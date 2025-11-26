@@ -1,0 +1,45 @@
+{
+    "name": "vscode-mcp-proxy",
+    "displayName": "VSCode MCP Proxy",
+    "description": "VSCode extension with WebSocket server for MCP proxying",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.90.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "mcpServerDefinitionProviders": [
+            {
+                "id": "vscode-mcp-proxy.refactoring",
+                "label": "VSCode Refactoring Tools"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./ && npm run copy-mcp-server",
+        "copy-mcp-server": "mkdir -p out/mcp-server && cp -r mcp-server/dist out/mcp-server/ && cp mcp-server/package.json out/mcp-server/",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.90.0",
+        "@types/ws": "^8.5.10",
+        "@types/node": "20.x",
+        "@typescript-eslint/eslint-plugin": "^7.11.0",
+        "@typescript-eslint/parser": "^7.11.0",
+        "eslint": "^8.57.0",
+        "typescript": "^5.4.5"
+    },
+    "dependencies": {
+        "ws": "^8.17.0"
+    }
+}
