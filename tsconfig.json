@@ -7,9 +7,13 @@
             "es2020"
         ],
         "sourceMap": true,
-        "rootDir": "src",
+        "rootDir": ".",
         "strict": true
     },
+    "include": [
+        "src/**/*",
+        "shared/**/*"
+    ],
     "exclude": [
         "node_modules",
         ".vscode-test",

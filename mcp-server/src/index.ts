@@ -4,7 +4,8 @@ import {
     CallToolRequestSchema,
     ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import WebSocket from "ws";
+import { getVSCodeClient } from "./vscode-client.js";
+import * as renameFileTool from "./tools/rename-file.js";
 
 const server = new Server(
     {
@@ -18,6 +19,9 @@ const server = new Server(
     }
 );
 
+/**
+ * List available tools
+ */
 server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
         tools: [
@@ -43,6 +47,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     };
 });
 
+/**
+ * Handle tool calls
+ */
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
     if (request.params.name === "rename_file") {
         const { oldUri, newUri } = request.params.arguments as {
@@ -51,7 +58,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
 
         try {
-            const result = await callVsCodeRename(oldUri, newUri);
+            const result = await renameFileTool.renameFile(oldUri, newUri);
             return {
                 content: [
                     {
@@ -76,46 +83,41 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     throw new Error("Tool not found");
 });
 
-async function callVsCodeRename(oldUri: string, newUri: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-        const ws = new WebSocket("ws://localhost:3000");
-
-        ws.on("open", () => {
-            const command = {
-                command: "renameFile",
-                arguments: { oldUri, newUri },
-                id: "1", // Simple ID for now
-            };
-            ws.send(JSON.stringify(command));
-        });
-
-        ws.on("message", (data) => {
-            try {
-                const response = JSON.parse(data.toString());
-                if (response.id === "1") {
-                    if (response.error) {
-                        reject(new Error(response.error));
-                    } else {
-                        resolve(response.result);
-                    }
-                    ws.close();
-                }
-            } catch (e) {
-                reject(e);
-                ws.close();
-            }
-        });
-
-        ws.on("error", (error) => {
-            reject(error);
-        });
-    });
-}
-
+/**
+ * Main entry point
+ */
 async function main() {
+    // Connect to VSCode extension
+    const client = getVSCodeClient();
+    try {
+        await client.connect();
+        console.log("Connected to VSCode extension WebSocket server");
+    } catch (error) {
+        console.error("Failed to connect to VSCode extension:", error);
+        console.error("Make sure the VSCode extension is running");
+        process.exit(1);
+    }
+
+    // Start MCP server
     const transport = new StdioServerTransport();
     await server.connect(transport);
+    console.log("MCP server started");
 }
+
+// Handle shutdown
+process.on('SIGINT', () => {
+    console.log('Shutting down...');
+    const client = getVSCodeClient();
+    client.close();
+    process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+    console.log('Shutting down...');
+    const client = getVSCodeClient();
+    client.close();
+    process.exit(0);
+});
 
 main().catch((error) => {
     console.error("Server error:", error);
