@@ -10,7 +10,7 @@
     },
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.23.0",
-        "@vscode-mcp/shared": "*",
+        "@vscode-mcp/shared": "workspace:^",
         "ws": "^8.17.0",
         "zod": "^4.1.13"
     },

@@ -718,7 +718,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode-mcp/shared@npm:*, @vscode-mcp/shared@workspace:packages/shared":
+"@vscode-mcp/shared@npm:*, @vscode-mcp/shared@workspace:^, @vscode-mcp/shared@workspace:packages/shared":
   version: 0.0.0-use.local
   resolution: "@vscode-mcp/shared@workspace:packages/shared"
   dependencies:
@@ -2921,7 +2921,7 @@ __metadata:
     "@modelcontextprotocol/sdk": "npm:^1.23.0"
     "@types/node": "npm:^20.0.0"
     "@types/ws": "npm:^8.5.10"
-    "@vscode-mcp/shared": "npm:*"
+    "@vscode-mcp/shared": "workspace:^"
     typescript: "npm:^5.4.5"
     ws: "npm:^8.17.0"
     zod: "npm:^4.1.13"

@@ -34,6 +34,7 @@ export enum VSCodeCommand {
     RENAME_FILE = 'renameFile',
     GET_SETTING = 'getSetting',
     SET_SETTING = 'setSetting',
+    RENAME_SYMBOL = 'renameSymbol'
 }
 
 /**

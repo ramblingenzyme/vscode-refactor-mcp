@@ -1,7 +1,7 @@
 import { VSCodeCommand } from "@vscode-mcp/shared";
 import { getVSCodeClient } from "../vscode-client.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import z from "zod"
+import z from "zod";
 
 /**
  * Rename a file in VSCode
@@ -51,10 +51,10 @@ The server will also attempt to set the workspace value automatically, but calli
 };
 
 export async function implementation(request: { oldUri: string; newUri: string; }): Promise<CallToolResult> {
-    INPUT_SCHEMA.parse(request);
-    const { oldUri, newUri } = request;
-
     try {
+        INPUT_SCHEMA.parse(request);
+        const { oldUri, newUri } = request;
+
         const client = getVSCodeClient();
         let importsUpdated = false;
 
@@ -70,7 +70,7 @@ export async function implementation(request: { oldUri: string; newUri: string; 
             if (current?.value !== 'always') {
                 await client.sendRequest('setSetting', {
                     key: 'typescript.updateImportsOnFileMove.enabled',
-                    value: 'alweys',
+                    value: 'always',
                     scope: 'workspace',
                 });
             }
@@ -89,11 +89,22 @@ export async function implementation(request: { oldUri: string; newUri: string; 
             ],
         };
     } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `Invalid input: ${error.issues.map((e) => e.message).join(", ")}`,
+                    },
+                ],
+                isError: true,
+            };
+        }
         return {
             content: [
                 {
                     type: "text",
-                    text: `Error renaming file: ${error.message}. Imports updated: false}`,
+                    text: `Error in ${name}: ${error.message}`,
                 },
             ],
             isError: true,
