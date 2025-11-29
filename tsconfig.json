@@ -2,21 +2,18 @@
     "compilerOptions": {
         "module": "commonjs",
         "target": "es2020",
-        "outDir": "out",
-        "lib": [
-            "es2020"
-        ],
         "sourceMap": true,
-        "rootDir": ".",
-        "strict": true
+        "strict": true,
+        "composite": true,
+        "declaration": true,
+        "declarationMap": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true
     },
-    "include": [
-        "src/**/*",
-        "shared/**/*"
-    ],
     "exclude": [
         "node_modules",
-        ".vscode-test",
-        "mcp-server"
+        "**/dist",
+        "**/out"
     ]
 }

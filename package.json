@@ -1,50 +1,20 @@
 {
-    "name": "vscode-mcp-proxy",
-    "displayName": "VSCode MCP Proxy",
-    "description": "VSCode extension with WebSocket server for MCP proxying",
-    "version": "0.0.1",
-    "engines": {
-        "vscode": "^1.90.0"
-    },
-    "categories": [
-        "Other"
+    "name": "vscode-mcp-monorepo",
+    "version": "1.0.0",
+    "private": true,
+    "workspaces": [
+        "packages/*"
     ],
-    "activationEvents": [
-        "onStartupFinished"
-    ],
-    "main": "./out/src/extension.js",
-    "contributes": {
-        "mcpServerDefinitionProviders": [
-            {
-                "id": "vscode-mcp-proxy.refactoring",
-                "label": "VSCode Refactoring Tools"
-            }
-        ]
-    },
     "scripts": {
-        "vscode:prepublish": "npm run build",
-        "build": "npm run build:extension && npm run build:mcp",
-        "build:extension": "tsc -p ./",
-        "build:mcp": "cd mcp-server && npm run build && cd ..",
-        "compile": "npm run build && npm run copy-mcp-server",
-        "copy-mcp-server": "mkdir -p out/mcp-server && cp -r mcp-server/dist out/mcp-server/ && cp mcp-server/package.json out/mcp-server/",
-        "clean": "rm -rf out dist mcp-server/dist *.vsix",
-        "watch": "tsc -watch -p ./",
-        "pretest": "npm run compile && npm run lint",
-        "lint": "eslint src --ext ts",
-        "test": "node ./out/test/runTest.js",
-        "package": "npm run build && vsce package"
+        "build": "npm run build --workspaces --if-present",
+        "test": "npm run test --workspaces --if-present",
+        "clean": "rm -rf node_modules packages/*/node_modules packages/*/dist packages/*/out"
     },
     "devDependencies": {
-        "@types/vscode": "^1.90.0",
-        "@types/ws": "^8.5.10",
-        "@types/node": "20.x",
         "@typescript-eslint/eslint-plugin": "^7.11.0",
         "@typescript-eslint/parser": "^7.11.0",
         "eslint": "^8.57.0",
         "typescript": "^5.4.5"
     },
-    "dependencies": {
-        "ws": "^8.17.0"
-    }
+    "packageManager": "yarn@4.12.0"
 }

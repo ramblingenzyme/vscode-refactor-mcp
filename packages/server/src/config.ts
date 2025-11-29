@@ -2,12 +2,14 @@
  * Configuration for the MCP server
  */
 
+import { IPC_CONFIG } from '@vscode-mcp/shared';
+
 /**
- * WebSocket client configuration
+ * IPC client configuration
  */
-export const WEBSOCKET_CONFIG = {
-    /** WebSocket server URL */
-    URL: process.env.VSCODE_WS_URL || 'ws://localhost:3000',
+export const CLIENT_CONFIG = {
+    /** Socket path from environment variable */
+    SOCKET_PATH: process.env[IPC_CONFIG.SOCKET_PATH_ENV_VAR],
     /** Reconnection delay in milliseconds */
     RECONNECT_DELAY: 1000,
     /** Maximum reconnection attempts */

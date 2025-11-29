@@ -1,12 +1,12 @@
-import WebSocket from 'ws';
-import { VSCodeRequest, VSCodeResponse } from '../../shared/protocol.js';
-import { WEBSOCKET_CONFIG } from './config.js';
+import * as net from 'net';
+import { VSCodeRequest, VSCodeResponse } from '@vscode-mcp/shared';
+import { CLIENT_CONFIG } from './config.js';
 
 /**
- * Persistent WebSocket client for communicating with VSCode extension
+ * Persistent IPC client for communicating with VSCode extension
  */
 export class VSCodeClient {
-    private ws: WebSocket | null = null;
+    private socket: net.Socket | null = null;
     private reconnectAttempts = 0;
     private requestId = 0;
     private pendingRequests = new Map<string, {
@@ -16,30 +16,43 @@ export class VSCodeClient {
     }>();
 
     /**
-     * Connect to the VSCode WebSocket server
+     * Connect to the VSCode extension IPC server
      */
     async connect(): Promise<void> {
+        if (!CLIENT_CONFIG.SOCKET_PATH) {
+            throw new Error('VSCODE_MCP_SOCKET_PATH environment variable is not set');
+        }
+
         return new Promise((resolve, reject) => {
             try {
-                this.ws = new WebSocket(WEBSOCKET_CONFIG.URL);
+                this.socket = net.createConnection(CLIENT_CONFIG.SOCKET_PATH!);
 
-                this.ws.on('open', () => {
-                    console.log('Connected to VSCode extension');
+                this.socket.on('connect', () => {
+                    console.error('Connected to VSCode extension');
                     this.reconnectAttempts = 0;
                     resolve();
                 });
 
-                this.ws.on('message', (data) => {
-                    this.handleMessage(data.toString());
+                let buffer = '';
+                this.socket.on('data', (data) => {
+                    buffer += data.toString();
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (line.trim()) {
+                            this.handleMessage(line);
+                        }
+                    }
                 });
 
-                this.ws.on('close', () => {
+                this.socket.on('close', () => {
                     console.log('Disconnected from VSCode extension');
                     this.handleDisconnect();
                 });
 
-                this.ws.on('error', (error) => {
-                    console.error('WebSocket error:', error);
+                this.socket.on('error', (error) => {
+                    console.error('IPC error:', error);
                     if (this.reconnectAttempts === 0) {
                         reject(error);
                     }
@@ -54,8 +67,8 @@ export class VSCodeClient {
      * Send a request to VSCode and wait for response
      */
     async sendRequest(command: string, args: Record<string, any>): Promise<any> {
-        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-            throw new Error('WebSocket is not connected');
+        if (!this.socket || this.socket.readyState !== 'open') {
+            throw new Error('IPC socket is not connected');
         }
 
         const id = this.generateRequestId();
@@ -70,13 +83,13 @@ export class VSCodeClient {
             const timeout = setTimeout(() => {
                 this.pendingRequests.delete(id);
                 reject(new Error('Request timeout'));
-            }, WEBSOCKET_CONFIG.REQUEST_TIMEOUT);
+            }, CLIENT_CONFIG.REQUEST_TIMEOUT);
 
             // Store pending request
             this.pendingRequests.set(id, { resolve, reject, timeout });
 
-            // Send request
-            this.ws!.send(JSON.stringify(request));
+            // Send request (newline delimited)
+            this.socket!.write(JSON.stringify(request) + '\n');
         });
     }
 
@@ -84,9 +97,9 @@ export class VSCodeClient {
      * Close the connection
      */
     close(): void {
-        if (this.ws) {
-            this.ws.close();
-            this.ws = null;
+        if (this.socket) {
+            this.socket.end();
+            this.socket = null;
         }
 
         // Reject all pending requests
@@ -124,17 +137,17 @@ export class VSCodeClient {
      * Handle disconnection and attempt reconnection
      */
     private handleDisconnect(): void {
-        this.ws = null;
+        this.socket = null;
 
-        if (this.reconnectAttempts < WEBSOCKET_CONFIG.MAX_RECONNECT_ATTEMPTS) {
+        if (this.reconnectAttempts < CLIENT_CONFIG.MAX_RECONNECT_ATTEMPTS) {
             this.reconnectAttempts++;
-            console.log(`Attempting to reconnect (${this.reconnectAttempts}/${WEBSOCKET_CONFIG.MAX_RECONNECT_ATTEMPTS})...`);
+            console.log(`Attempting to reconnect (${this.reconnectAttempts}/${CLIENT_CONFIG.MAX_RECONNECT_ATTEMPTS})...`);
 
             setTimeout(() => {
                 this.connect().catch((error) => {
                     console.error('Reconnection failed:', error);
                 });
-            }, WEBSOCKET_CONFIG.RECONNECT_DELAY);
+            }, CLIENT_CONFIG.RECONNECT_DELAY);
         } else {
             console.error('Max reconnection attempts reached');
         }

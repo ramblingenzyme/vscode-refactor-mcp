@@ -1,5 +1,5 @@
 /**
- * Shared type definitions for the WebSocket protocol between
+ * Shared type definitions for the IPC protocol between
  * the VSCode extension and the MCP server.
  */
 
@@ -32,6 +32,8 @@ export interface VSCodeResponse {
  */
 export enum VSCodeCommand {
     RENAME_FILE = 'renameFile',
+    GET_SETTING = 'getSetting',
+    SET_SETTING = 'setSetting',
 }
 
 /**
@@ -40,4 +42,15 @@ export enum VSCodeCommand {
 export interface RenameFileArgs {
     oldUri: string;
     newUri: string;
+}
+
+export interface GetSettingArgs {
+    key: string;
+    scope?: 'workspace' | 'user';
+}
+
+export interface SetSettingArgs {
+    key: string;
+    value: any;
+    scope?: 'workspace' | 'user';
 }

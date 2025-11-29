@@ -1,0 +1,50 @@
+{
+    "name": "vscode-mcp-proxy",
+    "displayName": "VSCode MCP Proxy",
+    "description": "VSCode extension with IPC server for MCP proxying",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.90.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "mcpServerDefinitionProviders": [
+            {
+                "id": "vscode-mcp-proxy.refactoring",
+                "label": "VSCode Refactoring Tools"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run build",
+        "build": "tsc -p ./",
+        "compile": "npm run build && npm run copy-mcp-server",
+        "copy-mcp-server": "mkdir -p out/mcp-server && cp -r ../server/dist out/mcp-server/ && cp ../server/package.json out/mcp-server/",
+        "clean": "rm -rf out dist *.vsix",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js",
+        "package": "npm run build && vsce package"
+    },
+    "devDependencies": {
+        "@types/node": "20.x",
+        "@types/vscode": "^1.90.0",
+        "@types/ws": "^8.5.10",
+        "@typescript-eslint/eslint-plugin": "^7.11.0",
+        "@typescript-eslint/parser": "^7.11.0",
+        "@vscode/vsce": "^3.7.1",
+        "eslint": "^8.57.0",
+        "typescript": "^5.4.5"
+    },
+    "dependencies": {
+        "@vscode-mcp/shared": "*",
+        "ws": "^8.17.0"
+    }
+}
