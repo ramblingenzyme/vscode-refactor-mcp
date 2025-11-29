@@ -30,5 +30,6 @@ coverage/
 Thumbs.db
 
 # Yarn
-.yarn
-!yarn/releases
+
+.yarn/*
+!.yarn/releases/
