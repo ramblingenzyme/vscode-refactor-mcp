@@ -13,7 +13,7 @@ This feature adds two essential refactoring capabilities to the VSCode MCP Proxy
 - **Rename Symbol**: A language service operation that renames a symbol and all its references
 - **VSCode Command**: A built-in VSCode command accessible via `vscode.commands.executeCommand`
 - **URI**: Uniform Resource Identifier in the format `file:///path/to/file`
-- **Position**: A location in a document defined by line and character offset
+- **Document Symbol**: A named entity in a document that can be located by the language service
 
 ## Requirements
 
@@ -32,14 +32,14 @@ This feature adds two essential refactoring capabilities to the VSCode MCP Proxy
 
 ### Requirement 2
 
-**User Story:** As an MCP client, I want to rename a symbol at a specific location in a file, so that all references to that symbol are updated consistently across the workspace.
+**User Story:** As an MCP client, I want to rename a symbol by its name in a file, so that all references to that symbol are updated consistently across the workspace.
 
 #### Acceptance Criteria
 
-1. WHEN the MCP client calls the rename symbol tool with a file URI, position, and new name THEN the system SHALL use VSCode's rename provider to prepare rename edits
+1. WHEN the MCP client calls the rename symbol tool with a file URI, original name, and new name THEN the system SHALL search for the symbol by name in the document and use VSCode's rename provider to prepare rename edits
 2. WHEN rename symbol is executed THEN the system SHALL apply the WorkspaceEdit to update all references to the symbol across all files in the workspace
 3. WHEN rename symbol is executed THEN the system SHALL preserve code semantics and respect language scoping rules
-4. IF no symbol exists at the specified position THEN the system SHALL return an error message indicating no symbol found
+4. IF no symbol with the specified name exists in the document THEN the system SHALL return an error message indicating the symbol was not found
 5. IF the rename operation is rejected by the language service THEN the system SHALL return an error message with the rejection reason
 6. WHEN rename symbol completes successfully THEN the system SHALL return a success message with the count of files modified and total edits applied
 
@@ -76,5 +76,5 @@ This feature adds two essential refactoring capabilities to the VSCode MCP Proxy
 1. WHEN a refactoring command fails THEN the system SHALL return an error response with a descriptive message
 2. WHEN input validation fails THEN the system SHALL return specific validation error details
 3. WHEN a file does not exist THEN the system SHALL return an error indicating the file was not found
-4. WHEN a position is out of bounds THEN the system SHALL return an error indicating invalid position
+4. WHEN a symbol name does not exist in the document THEN the system SHALL return an error indicating the symbol was not found
 5. WHEN VSCode command execution fails THEN the system SHALL return the underlying error message from VSCode

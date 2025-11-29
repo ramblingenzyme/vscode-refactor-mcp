@@ -43,10 +43,7 @@ export interface OrganizeImportsArgs {
 
 export interface RenameSymbolArgs {
   uri: string;
-  position: {
-    line: number;
-    character: number;
-  };
+  originalName: string;
   newName: string;
 }
 ```
@@ -92,28 +89,33 @@ case VSCodeCommand.ORGANIZE_IMPORTS:
 
 ```typescript
 case VSCodeCommand.RENAME_SYMBOL:
-    const { uri, position, newName } = request.arguments;
-    const pos = new vscode.Position(position.line, position.character);
+    const { uri, originalName, newName } = request.arguments;
+    const fileUri = vscode.Uri.parse(uri);
 
-    const workspaceEdit = await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
-        'vscode.executeDocumentRenameProvider',
-        vscode.Uri.parse(uri),
-        pos,
-        newName
+    const symbols = await vscode.commands.executeCommand<
+        Array<vscode.DocumentSymbol | vscode.SymbolInformation>
+    >('vscode.executeDocumentSymbolProvider', fileUri);
+
+    const targetSymbol = symbols.find(
+        (symbol): symbol is vscode.DocumentSymbol =>
+            symbol instanceof vscode.DocumentSymbol &&
+            symbol.name === originalName
     );
 
-    if (!workspaceEdit) {
-        response.result = { success: false, message: 'No symbol found at position' };
+    if (!targetSymbol) {
+        response.error = 'Could not find symbol';
         break;
     }
 
-    const success = await vscode.workspace.applyEdit(workspaceEdit);
-    const stats = {
-        filesModified: workspaceEdit.size,
-        totalEdits: Array.from(workspaceEdit.entries()).reduce((sum, [_, edits]) => sum + edits.length, 0)
-    };
+    const workspaceEdit = await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
+        'vscode.executeDocumentRenameProvider',
+        fileUri,
+        targetSymbol.selectionRange.start,
+        newName
+    );
 
-    response.result = { success, ...stats };
+    const success = await vscode.workspace.applyEdit(workspaceEdit);
+    response.result = { success };
     break;
 ```
 
@@ -206,12 +208,7 @@ import z from "zod";
 
 const INPUT_SCHEMA = z.object({
   uri: z.string().describe("The file URI containing the symbol"),
-  position: z
-    .object({
-      line: z.number().describe("Zero-based line number"),
-      character: z.number().describe("Zero-based character offset"),
-    })
-    .describe("Position of the symbol to rename"),
+  originalName: z.string().describe("Current name of the symbol to rename"),
   newName: z.string().describe("New name for the symbol"),
 });
 
@@ -224,27 +221,27 @@ export const description = {
   examples: [
     {
       uri: "file:///home/user/project/src/utils.ts",
-      position: { line: 10, character: 15 },
+      originalName: "oldFunctionName",
       newName: "newFunctionName",
     },
   ],
   notes:
-    "Uses VSCode's language service to find and rename all references. Position is zero-based.",
+    "Uses VSCode's language service to find the symbol by name and rename all references. The symbol must be defined in the specified file.",
 };
 
 export async function implementation(request: {
   uri: string;
-  position: { line: number; character: number };
+  originalName: string;
   newName: string;
 }): Promise<CallToolResult> {
   try {
     INPUT_SCHEMA.parse(request);
-    const { uri, position, newName } = request;
+    const { uri, originalName, newName } = request;
 
     const client = getVSCodeClient();
     const result = await client.sendRequest(VSCodeCommand.RENAME_SYMBOL, {
       uri,
-      position,
+      originalName,
       newName,
     });
 
@@ -306,15 +303,6 @@ export const tools = [
 ```
 
 ## Data Models
-
-### Position
-
-```typescript
-interface Position {
-  line: number; // Zero-based line number
-  character: number; // Zero-based character offset
-}
-```
 
 ### OrganizeImportsResult
 
