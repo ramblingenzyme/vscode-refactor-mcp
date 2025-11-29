@@ -180,36 +180,46 @@ export class IpcServer {
           case VSCodeCommand.RENAME_SYMBOL:
             try {
               const { uri, originalName, newName } = request.arguments;
-
               const fileUri = vscode.Uri.parse(uri);
-
               const symbols = await vscode.commands.executeCommand<
-                Array<vscode.DocumentSymbol | vscode.SymbolInformation>
-              >("vscode.executeDocumentSymbolProvider", fileUri);
-
-              const targetSymbol = symbols.find(
-                (symbol): symbol is vscode.DocumentSymbol =>
-                  symbol instanceof vscode.DocumentSymbol &&
-                  symbol.name === originalName
+                Array<vscode.SymbolInformation>
+              >("vscode.executeWorkspaceSymbolProvider", originalName);
+              const targetSymbol = symbols?.find(
+                (sym) => sym.name === originalName && sym.location.uri.toString() === fileUri.toString()
               );
-
               if (!targetSymbol) {
                 response.error = "Could not find symbol";
                 break;
               }
+              const workspaceEdit = await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
+                "vscode.executeDocumentRenameProvider",
+                fileUri,
+                targetSymbol.location.range.start,
+                newName
+              );
 
-              const workspaceEdit =
-                await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
-                  "vscode.executeDocumentRenameProvider",
-                  fileUri,
-                  targetSymbol.selectionRange.start,
-                  newName
-                );
-
+              if (!workspaceEdit) {
+                response.error = "Rename provider did not return a WorkspaceEdit.";
+                break;
+              }
               const success = await vscode.workspace.applyEdit(workspaceEdit);
 
-              response.result = { success: true };
-            } catch (error) {}
+              if (!success) {
+                response.error = "Failed to apply WorkspaceEdit for renaming.";
+                break;
+              }
+
+              const files = workspaceEdit.entries().map(([uri]) => uri);
+
+              await Promise.allSettled(
+                files.map((uri) => vscode.workspace.save(uri))
+              );
+
+              response.result = { success, files: files.map((uri) => uri.toString()) };
+            } catch (error) {
+              response.error = error instanceof Error ? error.message : String(error);
+            }
+            break;
           default:
             response.error = `Unknown command: ${request.command}`;
         }

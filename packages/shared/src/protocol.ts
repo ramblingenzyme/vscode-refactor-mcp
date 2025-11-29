@@ -72,3 +72,8 @@ export interface RenameSymbolArgs {
   originalName: string;
   newName: string;
 }
+
+export interface RunSourceActionArgs {
+    fileUri: string;
+    actionName: "organizeImports";
+}

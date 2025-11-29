@@ -61,6 +61,8 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.window.showErrorMessage('VSCode MCP Proxy: Failed to start IPC server');
     }
 
+    logger.info((await vscode.commands.getCommands(true)).join(", "));
+
     // Register cleanup on deactivation
     context.subscriptions.push({
         dispose: () => {

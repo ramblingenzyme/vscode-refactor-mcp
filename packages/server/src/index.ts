@@ -21,6 +21,7 @@ const server = new McpServer(
 // Register tools using the registry helper
 registerTool(server, tools.renameFile);
 registerTool(server, tools.setUpdateImportsSetting);
+registerTool(server, tools.renameSymbol);
 
 // Register resources using the registry helper
 registerResource(server, resources.updateImportsEnabled);

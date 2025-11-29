@@ -22,13 +22,13 @@
         ]
     },
     "scripts": {
-        "vscode:prepublish": "npm run build",
+        "vscode:prepublish": "yarn run build",
         "build": "tsc -p ./",
-        "compile": "npm run build && npm run copy-mcp-server",
+        "compile": "yarn run build && yarn run copy-mcp-server",
         "copy-mcp-server": "mkdir -p out/mcp-server && cp -r ../server/dist out/mcp-server/ && cp ../server/package.json out/mcp-server/",
         "clean": "rm -rf out dist *.vsix",
         "watch": "tsc -watch -p ./",
-        "pretest": "npm run compile && npm run lint",
+        "pretest": "yarn run compile && yarn run lint",
         "lint": "eslint src --ext ts",
         "test": "node ./out/test/runTest.js",
         "package": "npm run build && vsce package"
