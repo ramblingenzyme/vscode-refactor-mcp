@@ -1,6 +1,10 @@
 # VSCode MCP Monorepo
 
-This repository contains the source code for the VSCode MCP Proxy extension and its associated MCP server, organized as a monorepo.
+VSCode extension with an included MCP server that exposes tools to enable efficient refactoring via LLMs.
+
+The original tool/idea was to rename/move files via the underlying VSCode editor API so that language servers would automatically update imports just the same as if I was moving the files around in the sidebar and avoid an agent going through the slow and error prone loop of trying to update the imports itself.
+
+Primarily focused on VSCode/Copilot ATM as it's the only editor which seems to integrate with MCP servers declared by VSCode extensions.
 
 ## Project Structure
 
