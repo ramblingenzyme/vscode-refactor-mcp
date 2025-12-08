@@ -7,6 +7,10 @@
         "build": "tsc",
         "watch": "tsc -w"
     },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.23.0",
+        "zod": "^4.1.13"
+    },
     "devDependencies": {
         "typescript": "^5.4.5"
     }
