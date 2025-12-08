@@ -1,22 +1,22 @@
 {
-    "name": "vscode-mcp-monorepo",
-    "version": "1.0.0",
-    "private": true,
-    "workspaces": [
-        "packages/*"
-    ],
-    "scripts": {
-        "build": "npm run build --workspaces --if-present",
-        "test": "npm run test --workspaces --if-present",
-        "lint": "eslint . --ext .ts,.tsx",
-        "clean": "rm -rf node_modules packages/*/node_modules packages/*/dist packages/*/out"
-    },
-    "devDependencies": {
-        "@eslint/js": "^9.39.1",
-        "eslint": "^9.39.1",
-        "prettier": "^3.7.4",
-        "typescript": "^5.4.5",
-        "typescript-eslint": "^8.48.1"
-    },
-    "packageManager": "yarn@4.12.0"
+  "name": "vscode-mcp-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "eslint . --ext .ts,.tsx",
+    "clean": "rm -rf node_modules packages/*/node_modules packages/*/dist packages/*/out"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.48.1"
+  },
+  "packageManager": "yarn@4.12.0"
 }

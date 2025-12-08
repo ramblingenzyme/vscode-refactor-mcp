@@ -1,19 +1,15 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "target": "es2020",
-        "sourceMap": true,
-        "strict": true,
-        "composite": true,
-        "declaration": true,
-        "declarationMap": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
-    },
-    "exclude": [
-        "node_modules",
-        "**/dist",
-        "**/out"
-    ]
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020",
+    "sourceMap": true,
+    "strict": true,
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "exclude": ["node_modules", "**/dist", "**/out"]
 }

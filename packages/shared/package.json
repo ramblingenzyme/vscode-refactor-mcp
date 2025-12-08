@@ -1,17 +1,17 @@
 {
-    "name": "@vscode-mcp/shared",
-    "version": "1.0.0",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "scripts": {
-        "build": "tsc",
-        "watch": "tsc -w"
-    },
-    "dependencies": {
-        "@modelcontextprotocol/sdk": "^1.23.0",
-        "zod": "^4.1.13"
-    },
-    "devDependencies": {
-        "typescript": "^5.4.5"
-    }
+  "name": "@vscode-mcp/shared",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.23.0",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
 }

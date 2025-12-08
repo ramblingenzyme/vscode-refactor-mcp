@@ -3,8 +3,8 @@
  * registerTool and HTTP MCP server
  */
 
-import { z } from 'zod';
-import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { z } from "zod";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 /**
  * A tool that can be registered with both registerTool and HTTP MCP server
@@ -12,7 +12,7 @@ import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 export interface Tool {
   /** Unique tool identifier */
   name: string;
-  
+
   /** Tool metadata */
   description: {
     /** Human-readable description of what the tool does */
@@ -24,8 +24,8 @@ export interface Tool {
     /** Optional additional notes */
     notes?: string;
   };
-  
-  /** 
+
+  /**
    * Tool implementation - returns MCP CallToolResult
    * @param args - Tool arguments (will be validated against inputSchema)
    * @returns Promise resolving to CallToolResult with content and optional error flag

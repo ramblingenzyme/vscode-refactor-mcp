@@ -1,57 +1,57 @@
 {
-    "name": "vscode-mcp-proxy",
-    "displayName": "VSCode MCP Proxy",
-    "description": "VSCode extension with IPC server for MCP proxying",
-    "version": "0.0.1",
-    "engines": {
-        "vscode": "^1.90.0"
-    },
-    "categories": [
-        "Other"
-    ],
-    "activationEvents": [
-        "onStartupFinished"
-    ],
-    "main": "./out/extension.js",
-    "contributes": {
-        "configuration": {
-            "title": "VSCode MCP Proxy",
-            "properties": {
-                "vscode-mcp-proxy.enableHttpServer": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Enable the HTTP MCP server for external clients (e.g., VSCodium, fastmcp). When enabled, tools will be accessible via HTTP on the configured port."
-                },
-                "vscode-mcp-proxy.httpPort": {
-                    "type": "number",
-                    "default": 0,
-                    "minimum": 0,
-                    "maximum": 65535,
-                    "description": "Port for the HTTP MCP server. Use 0 for a random available port, or specify a port number between 1-65535."
-                }
-            }
+  "name": "vscode-mcp-proxy",
+  "displayName": "VSCode MCP Proxy",
+  "description": "VSCode extension with IPC server for MCP proxying",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "VSCode MCP Proxy",
+      "properties": {
+        "vscode-mcp-proxy.enableHttpServer": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable the HTTP MCP server for external clients (e.g., VSCodium, fastmcp). When enabled, tools will be accessible via HTTP on the configured port."
+        },
+        "vscode-mcp-proxy.httpPort": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 65535,
+          "description": "Port for the HTTP MCP server. Use 0 for a random available port, or specify a port number between 1-65535."
         }
-    },
-    "scripts": {
-        "vscode:prepublish": "yarn run build",
-        "build": "tsc -p ./",
-        "compile": "yarn run build",
-        "clean": "rm -rf out dist *.vsix",
-        "watch": "tsc -watch -p ./",
-        "pretest": "yarn run compile && yarn run lint",
-        "test": "node ./out/test/runTest.js",
-        "package": "npm run build && vsce package"
-    },
-    "devDependencies": {
-        "@types/express": "^5.0.6",
-        "@types/node": "20.x",
-        "@types/vscode": "^1.90.0",
-        "@vscode/vsce": "^3.7.1",
-        "typescript": "^5.4.5"
-    },
-    "dependencies": {
-        "@modelcontextprotocol/sdk": "^1.24.3",
-        "@vscode-mcp/shared": "*",
-        "zod": "^4.1.13"
+      }
     }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run build",
+    "build": "tsc -p ./",
+    "compile": "yarn run build",
+    "clean": "rm -rf out dist *.vsix",
+    "watch": "tsc -watch -p ./",
+    "pretest": "yarn run compile && yarn run lint",
+    "test": "node ./out/test/runTest.js",
+    "package": "npm run build && vsce package"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.7.1",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.24.3",
+    "@vscode-mcp/shared": "*",
+    "zod": "^4.1.13"
+  }
 }

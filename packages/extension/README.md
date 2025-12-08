@@ -118,6 +118,7 @@ npm run package
 ### Configuration
 
 The IPC server automatically generates a unique socket path for each VSCode workspace instance:
+
 - **Linux/macOS**: `/tmp/vscode-mcp-{random}.sock`
 - **Windows**: `\\\\.\\pipe\\vscode-mcp-{random}`
 
@@ -129,9 +130,9 @@ Messages sent from the MCP server to the VSCode extension:
 
 ```typescript
 interface VSCodeRequest {
-  id: string;              // Unique request identifier
-  command: string;         // Command name (e.g., 'renameFile')
-  arguments: Record<string, any>;  // Command-specific arguments
+  id: string; // Unique request identifier
+  command: string; // Command name (e.g., 'renameFile')
+  arguments: Record<string, any>; // Command-specific arguments
 }
 ```
 
@@ -141,9 +142,9 @@ Messages sent from the VSCode extension to the MCP server:
 
 ```typescript
 interface VSCodeResponse {
-  id: string;              // Matches request ID
-  result?: any;            // Success result
-  error?: string;          // Error message (if failed)
+  id: string; // Matches request ID
+  result?: any; // Success result
+  error?: string; // Error message (if failed)
 }
 ```
 
@@ -154,17 +155,21 @@ interface VSCodeResponse {
 Rename a file in the VSCode workspace.
 
 **Arguments:**
+
 ```typescript
 {
-  oldUri: string;  // Current file URI (e.g., 'file:///path/to/old.txt')
-  newUri: string;  // New file URI (e.g., 'file:///path/to/new.txt')
+  oldUri: string; // Current file URI (e.g., 'file:///path/to/old.txt')
+  newUri: string; // New file URI (e.g., 'file:///path/to/new.txt')
 }
 ```
 
 **Response:**
+
 ```typescript
 {
-  result: { success: boolean }  // true if successful
+  result: {
+    success: boolean;
+  } // true if successful
 }
 ```
 
@@ -189,8 +194,8 @@ Update `packages/shared/src/protocol.ts`:
 
 ```typescript
 export enum VSCodeCommand {
-    RENAME_FILE = 'renameFile',
-    MY_COMMAND = 'myCommand',
+  RENAME_FILE = "renameFile",
+  MY_COMMAND = "myCommand",
 }
 ```
 
@@ -199,8 +204,8 @@ export enum VSCodeCommand {
 Create a new file in `packages/server/src/tools/`:
 
 ```typescript
-import { VSCodeCommand } from '@vscode-mcp/shared';
-import { getVSCodeClient } from '../vscode-client.js';
+import { VSCodeCommand } from "@vscode-mcp/shared";
+import { getVSCodeClient } from "../vscode-client.js";
 
 export async function myTool(arg1: string, arg2: number): Promise<any> {
   const client = getVSCodeClient();
@@ -229,6 +234,7 @@ npm test -w packages/server
 **Error:** `Failed to connect to VSCode extension`
 
 **Solution:**
+
 1. Ensure the VSCode extension is running (press `F5` in VSCode)
 2. Check the VSCode output channel "VSCode MCP Proxy" for the socket path
 3. Verify the VSCODE_MCP_SOCKET_PATH environment variable is set correctly
@@ -236,6 +242,7 @@ npm test -w packages/server
 ### Build Errors
 
 **Solution:** Clean and rebuild:
+
 ```bash
 npm run clean
 npm run build
@@ -260,6 +267,7 @@ npm run build
 ### Connection Management
 
 The MCP server connects to the VSCode extension via IPC:
+
 - **Automatic Socket Discovery**: Socket path passed via environment variable
 - **Line-delimited JSON**: Messages are sent as JSON strings separated by newlines
 - **Request Correlation**: Unique IDs for matching requests with responses
