@@ -1,0 +1,24 @@
+# Exclude everything outside this directory
+../
+../../
+
+# Exclude source files and build artifacts
+src/
+out/
+node_modules/
+*.map
+*.log
+.rollup.cache/
+
+# Exclude development files
+tsconfig*.json
+rollup.config.mjs
+.eslintrc.*
+.gitignore
+README.md
+
+# Include only the bundled extension and manifest
+!package.json
+!dist/extension.js
+!dist/package.json
+!dist/README.md
