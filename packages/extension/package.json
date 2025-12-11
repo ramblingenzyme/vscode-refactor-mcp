@@ -15,6 +15,129 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "languageModelTools": [
+      {
+        "name": "rename_file",
+        "displayName": "Rename File",
+        "tags": [
+          "workspace"
+        ],
+        "toolReferenceName": "renameFile",
+        "canBeReferencedInPrompt": true,
+        "userDescription": "Rename a file and update all imports",
+        "modelDescription": "Renames a file or directory from `oldUri` to `newUri`. This tool automatically updates all import statements in the workspace that reference the moved file. Use this when the user asks to move or rename a file.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "oldUri": {
+              "type": "string",
+              "description": "The current file URI"
+            },
+            "newUri": {
+              "type": "string",
+              "description": "The new file URI"
+            }
+          },
+          "required": [
+            "oldUri",
+            "newUri"
+          ]
+        }
+      },
+      {
+        "name": "rename_symbol",
+        "displayName": "Rename Symbol",
+        "tags": [
+          "workspace"
+        ],
+        "userDescription": "Rename a symbol and update all references",
+        "modelDescription": "Renames a symbol (function, class, variable, etc.) at the specified `fileUri` and `originalName` to `newName`. This tool uses VS Code's refactoring capabilities to update all references to the symbol across the workspace. Use this when the user asks to rename a variable or function.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "fileUri": {
+              "type": "string",
+              "description": "The file URI containing the symbol"
+            },
+            "originalName": {
+              "type": "string",
+              "description": "The current name of the symbol"
+            },
+            "newName": {
+              "type": "string",
+              "description": "The new name for the symbol"
+            }
+          },
+          "required": [
+            "fileUri",
+            "originalName",
+            "newName"
+          ]
+        }
+      },
+      {
+        "name": "get_setting",
+        "displayName": "Get Setting",
+        "tags": [
+          "workspace"
+        ],
+        "userDescription": "Get a workspace or user configuration setting",
+        "modelDescription": "Retrieves the value of a VS Code configuration setting identified by `key`. Can optionally specify a `scope` ('user' or 'workspace'). Use this to check the current configuration of the editor or extension.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "description": "The configuration key (e.g., \"editor.fontSize\")"
+            },
+            "scope": {
+              "type": "string",
+              "enum": [
+                "workspace",
+                "user"
+              ],
+              "description": "The configuration scope (defaults to workspace)"
+            }
+          },
+          "required": [
+            "key"
+          ]
+        }
+      },
+      {
+        "name": "set_setting",
+        "displayName": "Set Setting",
+        "tags": [
+          "workspace"
+        ],
+        "userDescription": "Set a workspace or user configuration setting",
+        "modelDescription": "Updates a VS Code configuration setting identified by `key` to the specified `value`. Can optionally specify a `scope` ('user' or 'workspace'). Use this when the user asks to change an editor setting or extension configuration.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "description": "The configuration key (e.g., \"editor.fontSize\")"
+            },
+            "value": {
+              "description": "The value to set"
+            },
+            "scope": {
+              "type": "string",
+              "enum": [
+                "workspace",
+                "user"
+              ],
+              "description": "The configuration scope (defaults to workspace)"
+            }
+          },
+          "required": [
+            "key",
+            "value"
+          ]
+        }
+      }
+    ],
     "configuration": {
       "title": "VSCode MCP Proxy",
       "properties": {
