@@ -52,87 +52,22 @@ const isInitializeRequest = (body: unknown): boolean => {
 };
 
 export class HttpMcpServer {
-  private sessions = new Map<string, McpSession>();
-  private app?: Express;
   private httpServer?: HttpServer;
-  private tools: Tool[] = [];
   private configuredPort: number;
-  private actualPort = 0;
-  private isRunning = false;
   private sessionManager: SessionManager;
 
-  constructor(port: number) {
+  constructor(tools: Tool[], port: number) {
     this.configuredPort = port;
-    this.sessionManager = new SessionManager(this.createMcpServer());
+    this.sessionManager = new SessionManager(this.createMcpServer(tools));
   }
 
-  async start(tools: Tool[]): Promise<number> {
-    if (this.httpServer) {
-      return this.actualPort;
-    }
-
-    this.tools = tools;
-
-    try {
-      this.app = createMcpExpressApp({ host: "localhost" });
-
-      this.app.route("/mcp").all(async (req, res) => {
-        const sessionId = req.headers["mcp-session-id"] as string | undefined;
-        if (!sessionId && !isInitializeRequest(req.body)) {
-          return this.sendError(res, 400, "Bad Request: No valid session ID");
-        }
-
-        try {
-          const transport = this.sessionManager.getSession(sessionId);
-          await transport.handleRequest(req, res, req.body);
-        } catch (e) {
-          console.error(e);
-          this.sendError(
-            res,
-            500,
-            e instanceof Error ? e.message : "Unknown error",
-          );
-        }
-      });
-
-      await new Promise<void>((resolve, reject) => {
-        this.httpServer = this.app!.listen(
-          this.configuredPort,
-          "localhost",
-          () => {
-            const addr = this.httpServer!.address();
-            this.actualPort =
-              typeof addr === "object" && addr !== null
-                ? addr.port
-                : this.configuredPort;
-            this.isRunning = true;
-            resolve();
-          },
-        );
-
-        this.httpServer!.on("error", (error: NodeJS.ErrnoException) => {
-          const message =
-            error.code === "EADDRINUSE"
-              ? `Port ${this.configuredPort} is already in use. Please choose a different port or use port 0 for automatic assignment.`
-              : error.message;
-          reject(new Error(message));
-        });
-      });
-
-      return this.actualPort;
-    } catch (error) {
-      await this.cleanup();
-      throw error;
-    }
-  }
-
-  private createMcpServer(): McpServer {
+  private createMcpServer(tools: Tool[]): McpServer {
     const mcpServer = new McpServer(
       { name: "vscode-refactoring-tools", version: "1.0.0" },
       { capabilities: { tools: {} } },
     );
 
-    for (const tool of this.tools) {
+    for (const tool of tools) {
       mcpServer.registerTool(
         tool.name,
         {
@@ -146,6 +81,55 @@ export class HttpMcpServer {
     return mcpServer;
   }
 
+  private createExpressApp() {
+    const app = createMcpExpressApp({ host: "localhost" });
+
+    app.route("/mcp").all(async (req, res) => {
+      const sessionId = req.headers["mcp-session-id"] as string | undefined;
+      if (!sessionId && !isInitializeRequest(req.body)) {
+        return this.sendError(res, 400, "Bad Request: No valid session ID");
+      }
+
+      try {
+        const transport = this.sessionManager.getSession(sessionId);
+        await transport.handleRequest(req, res, req.body);
+      } catch (e) {
+        console.error(e);
+        this.sendError(
+          res,
+          500,
+          e instanceof Error ? e.message : "Unknown error",
+        );
+      }
+    });
+
+    return app;
+  }
+
+  async start(): Promise<void> {
+    if (this.httpServer) {
+      return;
+    }
+
+    try {
+      const app = this.createExpressApp();
+
+      this.httpServer = app.listen(
+        this.configuredPort,
+        "localhost",
+        (error) => {
+          // TODO: handle properly
+          if (error) {
+            throw error;
+          }
+        },
+      );
+    } catch (error) {
+      await this.dispose();
+      throw error;
+    }
+  }
+
   private sendError(res: Response, status: number, message: string): void {
     res.status(status).json({
       jsonrpc: "2.0",
@@ -155,46 +139,23 @@ export class HttpMcpServer {
   }
 
   getPort(): number {
-    return this.actualPort;
+    return this.configuredPort;
   }
 
   isServerRunning(): boolean {
-    return this.isRunning;
+    return !!this.httpServer;
   }
 
   getServerUrl(): string | null {
-    return this.isRunning && this.actualPort > 0
-      ? `http://localhost:${this.actualPort}`
-      : null;
+    const addr = this.httpServer?.address();
+    return addr?.toString() || null;
   }
 
-  async stop(): Promise<void> {
-    if (this.isRunning) {
-      await this.cleanup();
-    }
-  }
-
-  private async cleanup(): Promise<void> {
-    this.isRunning = false;
-
-    for (const [sessionId, session] of this.sessions.entries()) {
-      try {
-        await session.transport.close();
-        await session.server.close();
-      } catch (error) {
-        console.error(`Error closing session ${sessionId}:`, error);
-      }
-    }
-    this.sessions.clear();
-
+  async dispose(): Promise<void> {
     if (this.httpServer) {
-      await new Promise<void>((resolve) => {
-        this.httpServer!.close(() => resolve());
+      this.httpServer!.close(() => {
+        this.httpServer = undefined;
       });
-      this.httpServer = undefined;
     }
-
-    this.app = undefined;
-    this.actualPort = 0;
   }
 }

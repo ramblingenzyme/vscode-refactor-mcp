@@ -9,9 +9,8 @@ inclusion: always
 ```
 vscode-mcp-monorepo/
 ├── packages/
-│   ├── extension/     # VSCode extension with IPC server
-│   ├── server/        # MCP server implementation
-│   └── shared/        # Shared protocol definitions
+│   ├── extension/     # VSCode extension with tool implementations
+│   └── shared/        # Shared type definitions
 ├── .yarn/             # Yarn Berry cache and releases
 ├── package.json       # Root workspace configuration
 └── tsconfig.json      # Base TypeScript configuration
@@ -19,13 +18,21 @@ vscode-mcp-monorepo/
 
 ## Package: extension
 
-VSCode extension that hosts the IPC server.
+VSCode extension with tool implementations and integration adapters.
 
 ```
 packages/extension/
 ├── src/
-│   ├── ipc/           # IPC server implementation
+│   ├── tools/         # Tool implementations
+│   │   ├── index.ts           # Tool registry
+│   │   ├── rename-file.ts     # File rename tool
+│   │   ├── rename-symbol.ts   # Symbol rename tool
+│   │   └── settings.ts        # Settings tools
+│   ├── integrations/  # Integration adapters
+│   │   ├── register-tool.ts   # registerTool adapter
+│   │   └── http-server.ts     # HTTP MCP server
 │   ├── utils/         # Utility functions
+│   │   └── logger.ts
 │   ├── config.ts      # Configuration management
 │   └── extension.ts   # Extension entry point
 ├── out/               # Compiled output (CommonJS)
@@ -36,40 +43,17 @@ packages/extension/
 **Key Details:**
 - Entry point: `extension.ts` (activated on `onStartupFinished`)
 - Output: `out/extension.js` (CommonJS)
-- Contributes: `mcpServerDefinitionProviders` for VSCode MCP integration
-
-## Package: server
-
-MCP server that connects to the extension via IPC.
-
-```
-packages/server/
-├── src/
-│   ├── tools/         # MCP tool implementations
-│   ├── config.ts      # Server configuration
-│   ├── index.ts       # Server entry point
-│   └── vscode-client.ts  # IPC client for VSCode communication
-├── test/
-│   └── integration.test.ts
-├── dist/              # Compiled output (ES modules)
-└── package.json
-```
-
-**Key Details:**
-- Entry point: `index.ts`
-- Output: `dist/` (ES modules)
-- Uses MCP SDK for protocol implementation
-- Connects to extension's IPC server via WebSocket
+- Contributes: Configuration settings for HTTP server
+- Dual integration: registerTool (in-process) + HTTP server (optional)
 
 ## Package: shared
 
-Shared type definitions and protocol specifications.
+Shared type definitions and tool interfaces.
 
 ```
 packages/shared/
 ├── src/
-│   ├── config.ts      # Shared configuration types
-│   ├── protocol.ts    # IPC protocol definitions
+│   ├── tool.ts        # Tool interface definition
 │   └── index.ts       # Public exports
 ├── dist/              # Compiled output
 └── package.json
@@ -77,23 +61,27 @@ packages/shared/
 
 **Key Details:**
 - Published as `@vscode-mcp/shared`
-- Contains `VSCodeRequest`, `VSCodeResponse`, and command enums
-- Used by both extension and server packages
+- Contains `Tool` interface used by extension
+- Provides common types for tool implementations
 
 ## Architecture Patterns
 
-### IPC Communication
-- Extension hosts WebSocket server on Unix Domain Socket/Named Pipe
-- Server connects as WebSocket client
-- Request/response pattern with unique IDs
-- Type-safe protocol defined in `shared/protocol.ts`
+### Dual Integration
+- **registerTool**: Tools registered in-process when `vscode.lm.registerTool` is available
+- **HTTP Server**: Optional HTTP server exposes tools via MCP protocol
+- Both paths share the same tool implementations
 
-### Workspace Isolation
-- Each VSCode workspace instance has isolated IPC connection
-- Socket/pipe paths include workspace identifiers
-- Multiple workspaces can run simultaneously
+### Tool Implementation
+- Tools return `CallToolResult` from MCP SDK
+- Input validation using Zod schemas
+- Error handling centralized in tool implementations
+- No format conversion needed between integration paths
+
+### Configuration
+- Settings stored in VSCode configuration
+- `enableHttpServer`: Enable/disable HTTP server (default: false)
+- `httpPort`: Port for HTTP server (default: 0 for random port)
 
 ### Build Dependencies
 1. Build `shared` first (provides types)
-2. Build `extension` and `server` (depend on `shared`)
-3. Extension copies server dist during `compile` script
+2. Build `extension` (depends on `shared`)

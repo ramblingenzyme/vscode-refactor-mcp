@@ -80,7 +80,7 @@ async function showServerOptions(): Promise<void> {
 
     case "stop":
       try {
-        await httpMcpServer.stop();
+        await httpMcpServer.dispose();
         httpMcpServer = undefined;
 
         // Hide status bar item
@@ -163,8 +163,9 @@ export async function activate(context: vscode.ExtensionContext) {
           );
         }
 
-        httpMcpServer = new HttpMcpServer(config.httpPort);
-        await httpMcpServer.start(allTools);
+        httpMcpServer = new HttpMcpServer(allTools, config.httpPort);
+        await httpMcpServer.start();
+        context.subscriptions.push(httpMcpServer);
 
         const serverUrl = httpMcpServer.getServerUrl();
         logger.info(`HTTP MCP server started on ${serverUrl}`);
@@ -205,36 +206,5 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Don't throw - allow extension to remain in a degraded state
     // rather than completely failing to activate
-  }
-}
-
-/**
- * Deactivate the extension
- */
-export async function deactivate() {
-  logger.info("Extension deactivating...");
-
-  try {
-    // Dispose all registered tools (handled by context.subscriptions)
-    // No explicit action needed - VSCode will dispose all subscriptions
-
-    // Stop HTTP server if running
-    if (httpMcpServer) {
-      await httpMcpServer.stop();
-      httpMcpServer = undefined;
-      logger.info("HTTP MCP server stopped");
-    }
-
-    // Clean up status bar item
-    if (statusBarItem) {
-      statusBarItem.dispose();
-      statusBarItem = undefined;
-      logger.info("Status bar item disposed");
-    }
-
-    logger.info("Extension deactivated successfully");
-  } catch (error) {
-    logger.error("Error during deactivation:", error);
-    // Don't throw - allow deactivation to complete
   }
 }

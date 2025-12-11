@@ -180,21 +180,21 @@
     - Clean up any remaining IPC-related code
     - _Requirements: N/A (cleanup)_
 
-- [ ] 10. Update documentation
-  - [ ] 10.1 Update README.md
+- [x] 10. Update documentation
+  - [x] 10.1 Update README.md
     - Document new architecture (registerTool + HTTP server)
     - Explain configuration settings
     - Provide examples for VSCode and VSCodium users
     - Document how to connect external MCP clients
     - _Requirements: N/A (documentation)_
 
-  - [ ] 10.2 Update AGENTS.md
+  - [x] 10.2 Update AGENTS.md
     - Update project goals and structure
     - Document new package organization
     - Remove references to IPC bridge
     - _Requirements: N/A (documentation)_
 
-  - [ ] 10.3 Update steering files
+  - [x] 10.3 Update steering files
     - Update product.md with new architecture
     - Update structure.md with new package layout
     - Update tech.md with new dependencies

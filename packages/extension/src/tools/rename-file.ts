@@ -52,28 +52,6 @@ export const renameFileTool: Tool = {
         };
       }
 
-      // Ensure TypeScript import settings are configured
-      const config = vscode.workspace.getConfiguration("typescript");
-      const currentValue = config.get<string>(
-        "updateImportsOnFileMove.enabled",
-      );
-
-      let importsWillBeUpdated = currentValue === "always";
-
-      if (currentValue !== "always") {
-        try {
-          await config.update(
-            "updateImportsOnFileMove.enabled",
-            "always",
-            false,
-          );
-          importsWillBeUpdated = true;
-        } catch (error) {
-          // Log but continue - the rename might still work
-          console.warn("Failed to update TypeScript import settings:", error);
-        }
-      }
-
       // Perform the rename
       const edit = new vscode.WorkspaceEdit();
       edit.renameFile(oldUriObj, newUriObj);
@@ -96,7 +74,7 @@ export const renameFileTool: Tool = {
         content: [
           {
             type: "text",
-            text: `Successfully renamed file from ${input.oldUri} to ${input.newUri}. Imports updated: ${importsWillBeUpdated}`,
+            text: `Successfully renamed file from ${input.oldUri} to ${input.newUri}.`,
           },
         ],
       };
